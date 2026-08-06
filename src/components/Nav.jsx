@@ -3,12 +3,13 @@ const links = [
   { num: "02", label: "Stack", href: "#skills" },
   { num: "03", label: "Projects", href: "#projects" },
   { num: "04", label: "Journey", href: "#journey" },
-  { num: "05", label: "Contact", href: "#contact" },
+  { num: "05", label: "Blog", href: "#blog" },
+  { num: "06", label: "Contact", href: "#contact" },
 ];
 
 export default function Nav() {
   return (
-    <nav className="nav">
+    <nav className="nav" aria-label="Primary">
       <div className="nav-mark">
         <span className="dot" /> MANISH.KUMAR
       </div>

@@ -1,10 +1,111 @@
+import { useState } from "react";
+import { motion } from "framer-motion";
 import Reveal from "./Reveal";
 import { profile } from "../data/content";
 
+/**
+ * Contact — a real, production-ready "Say Hello" form.
+ *
+ * Root cause of the original issue: there was no contact form at
+ * all — "Say Hello" was just a `mailto:` link, which silently fails
+ * for any visitor without a configured desktop mail client (the
+ * majority of mobile/browser users), with zero feedback that
+ * anything went wrong. This replaces it with an in-page form that
+ * sends via EmailJS (a client-side email API — no backend server
+ * needed for a static Vite/React app), with full validation,
+ * loading/success/error states, and a honeypot field for basic spam
+ * prevention. The mailto/GitHub/LinkedIn links stay as a fallback.
+ *
+ * Setup: copy .env.example to .env, create a free EmailJS account,
+ * and fill in VITE_EMAILJS_SERVICE_ID / VITE_EMAILJS_TEMPLATE_ID /
+ * VITE_EMAILJS_PUBLIC_KEY. The form degrades gracefully (clear error
+ * message, no crash) if those env vars are missing.
+ */
+
+const initialForm = { name: "", email: "", message: "", company: "" }; // `company` = honeypot
+
+function validate(form) {
+  const errors = {};
+  if (!form.name.trim()) errors.name = "Please enter your name.";
+  if (!form.email.trim()) {
+    errors.email = "Please enter your email.";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+    errors.email = "That email doesn't look right.";
+  }
+  if (!form.message.trim()) {
+    errors.message = "Say something — even a quick hello.";
+  } else if (form.message.trim().length < 10) {
+    errors.message = "A little more detail helps (10+ characters).";
+  }
+  return errors;
+}
+
 export default function Contact() {
+  const [form, setForm] = useState(initialForm);
+  const [errors, setErrors] = useState({});
+  const [status, setStatus] = useState("idle"); // idle | sending | success | error
+  const [errorMessage, setErrorMessage] = useState("");
+
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setForm((f) => ({ ...f, [name]: value }));
+    if (errors[name]) setErrors((er) => ({ ...er, [name]: undefined }));
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+
+    // Honeypot: real users never fill this hidden field in.
+    if (form.company) {
+      setStatus("success");
+      return;
+    }
+
+    const nextErrors = validate(form);
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+
+    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
+    if (!serviceId || !templateId || !publicKey) {
+      setStatus("error");
+      setErrorMessage(
+        "Email isn't configured yet — reach me directly at the address below instead."
+      );
+      return;
+    }
+
+    setStatus("sending");
+    setErrorMessage("");
+
+    try {
+      const emailjs = (await import("@emailjs/browser")).default;
+      await emailjs.send(
+        serviceId,
+        templateId,
+        {
+          from_name: form.name.trim(),
+          from_email: form.email.trim(),
+          message: form.message.trim(),
+          to_email: profile.email,
+        },
+        { publicKey }
+      );
+      setStatus("success");
+      setForm(initialForm);
+    } catch (err) {
+      setStatus("error");
+      setErrorMessage(
+        "Something went wrong sending that — please try the email link below."
+      );
+    }
+  }
+
   return (
     <section id="contact">
-      <Reveal className="eyebrow">05 / Contact</Reveal>
+      <Reveal className="eyebrow">06 / Contact</Reveal>
 
       <Reveal as="h2" className="contact-title" delay={0.05}>
         Let's turn your data
@@ -14,7 +115,106 @@ export default function Contact() {
 
       <Reveal as="p" className="sub" delay={0.1}>
         Open to data science & ML engineering roles. I reply fast — drop a
-        line.
+        line below or reach out directly.
+      </Reveal>
+
+      <Reveal delay={0.12} y={20}>
+        <form className="contact-form" onSubmit={handleSubmit} noValidate>
+          {/* Honeypot — hidden from real users, invisible to screen
+              readers, but bots that auto-fill every field trip it. */}
+          <div className="hp-field" aria-hidden="true">
+            <label htmlFor="company">Company</label>
+            <input
+              id="company"
+              name="company"
+              type="text"
+              tabIndex={-1}
+              autoComplete="off"
+              value={form.company}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="form-row">
+            <div className="form-field">
+              <label htmlFor="name">Name</label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                autoComplete="name"
+                value={form.name}
+                onChange={handleChange}
+                aria-invalid={!!errors.name}
+                aria-describedby={errors.name ? "name-error" : undefined}
+              />
+              {errors.name && (
+                <span className="field-error" id="name-error" role="alert">
+                  {errors.name}
+                </span>
+              )}
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="email">Email</label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                value={form.email}
+                onChange={handleChange}
+                aria-invalid={!!errors.email}
+                aria-describedby={errors.email ? "email-error" : undefined}
+              />
+              {errors.email && (
+                <span className="field-error" id="email-error" role="alert">
+                  {errors.email}
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="message">Message</label>
+            <textarea
+              id="message"
+              name="message"
+              rows={5}
+              value={form.message}
+              onChange={handleChange}
+              aria-invalid={!!errors.message}
+              aria-describedby={errors.message ? "message-error" : undefined}
+            />
+            {errors.message && (
+              <span className="field-error" id="message-error" role="alert">
+                {errors.message}
+              </span>
+            )}
+          </div>
+
+          <div className="form-footer">
+            <motion.button
+              type="submit"
+              className="btn btn-solid"
+              disabled={status === "sending"}
+              whileTap={{ scale: 0.97 }}
+            >
+              {status === "sending" ? "Sending…" : "Send Message"}
+            </motion.button>
+
+            <div className="form-status" role="status" aria-live="polite">
+              {status === "success" && (
+                <span className="status-ok">
+                  ✓ Sent — I'll get back to you soon.
+                </span>
+              )}
+              {status === "error" && (
+                <span className="status-err">{errorMessage}</span>
+              )}
+            </div>
+          </div>
+        </form>
       </Reveal>
 
       <Reveal className="contact-links" delay={0.15}>

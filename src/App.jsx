@@ -1,12 +1,16 @@
 import { useEffect, useRef } from "react";
 import SceneBackground from "./components/SceneBackground";
 import CustomCursor from "./components/CustomCursor";
+import MouseGlow from "./components/MouseGlow";
+import ScrollProgress from "./components/ScrollProgress";
+import Loader from "./components/Loader";
 import Nav from "./components/Nav";
 import Hero from "./components/Hero";
 import About from "./components/About";
 import Skills from "./components/Skills";
 import Projects from "./components/Projects";
 import Journey from "./components/Journey";
+import Blog from "./components/Blog";
 import Contact from "./components/Contact";
 import "./App.css";
 
@@ -40,18 +44,26 @@ export default function App() {
 
   return (
     <>
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
+
+      <Loader />
+      <ScrollProgress />
       <SceneBackground scrollRef={scrollRef} mouseRef={mouseRef} />
       <div className="grain" />
+      <MouseGlow />
       <CustomCursor />
 
       <Nav />
 
-      <main>
+      <main id="main-content">
         <Hero />
         <About />
         <Skills />
         <Projects />
         <Journey />
+        <Blog />
         <Contact />
       </main>
 
