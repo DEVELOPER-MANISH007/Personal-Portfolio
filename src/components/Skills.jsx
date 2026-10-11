@@ -2,94 +2,20 @@ import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import Reveal from "./Reveal";
 import SkillIcon from "./SkillIcon";
 import { skillClusters } from "../data/content";
-
-/**
- * SkillChip — a single skill pill with its logo. Tracks the mouse
- * locally and tilts + lifts toward the cursor with spring physics,
- * and glows in the cluster's accent color on hover.
- */
-function SkillChip({ item, color }) {
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-
-  const springX = useSpring(x, { stiffness: 220, damping: 18 });
-  const springY = useSpring(y, { stiffness: 220, damping: 18 });
-
-  const rotateX = useTransform(springY, [-30, 30], [10, -10]);
-  const rotateY = useTransform(springX, [-30, 30], [-10, 10]);
-  const translateY = useTransform(springY, [-30, 30], [4, -4]);
-
-  function handleMove(e) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    x.set(e.clientX - rect.left - rect.width / 2);
-    y.set(e.clientY - rect.top - rect.height / 2);
-  }
-  function handleLeave() {
-    x.set(0);
-    y.set(0);
-  }
-
-  return (
-    <motion.li
-      onMouseMove={handleMove}
-      onMouseLeave={handleLeave}
-      style={{
-        rotateX,
-        rotateY,
-        y: translateY,
-        "--accent": color,
-      }}
-      whileHover={{ scale: 1.06 }}
-      className="skill-chip"
-    >
-      <span className="skill-chip-icon">
-        <SkillIcon name={item.icon} />
-      </span>
-      <span className="skill-chip-name">{item.name}</span>
-    </motion.li>
-  );
+function SkillCard({ cluster, index }) {
+  const x = useMotionValue(0), y = useMotionValue(0);
+  const sx = useSpring(x, { stiffness: 180, damping: 24 }), sy = useSpring(y, { stiffness: 180, damping: 24 });
+  const rotateX = useTransform(sy, [-100, 100], [4, -4]), rotateY = useTransform(sx, [-140, 140], [-5, 5]);
+  function move(e) { const r=e.currentTarget.getBoundingClientRect(); x.set(e.clientX-r.left-r.width/2); y.set(e.clientY-r.top-r.height/2); }
+  function reset() { x.set(0); y.set(0); }
+  const feature = cluster.title === "Machine Learning";
+  return <Reveal className={`cluster${feature ? " cluster-featured" : ""}`} delay={index * .05} y={18}><motion.article onMouseMove={move} onMouseLeave={reset} style={{ rotateX, rotateY, "--accent": cluster.color }} className="cluster-surface">
+    <div className="cluster-topline"><span className="cluster-index mono">0{index + 1} / FIELD</span><span className="orbit-dot" /></div>
+    <div className="cluster-head"><h3>{cluster.title}</h3><span className="cluster-mark" aria-hidden="true">{feature ? "ƒ(x)" : "↗"}</span></div>
+    <ul className="skill-chip-list">{cluster.items.map((item) => <li className="skill-chip" key={item.name}><span className="skill-chip-icon"><SkillIcon name={item.icon} /></span><span className="skill-chip-name">{item.name}</span></li>)}</ul>
+    <div className="cluster-spark" aria-hidden="true"><span /><span /><span /><span /><span /><span /><span /><span /></div>
+  </motion.article></Reveal>;
 }
-
 export default function Skills() {
-  return (
-    <section id="skills">
-      <Reveal className="eyebrow">02 / Tech Stack</Reveal>
-
-      <div className="sec-head">
-        <Reveal as="h2" className="sec-title">
-          Tools of the trade
-        </Reveal>
-        <Reveal as="div" className="sec-count mono" delay={0.1}>
-          six clusters · core orbit
-        </Reveal>
-      </div>
-
-      <div className="skill-clusters">
-        {skillClusters.map((cluster, i) => (
-          <Reveal
-            key={cluster.title}
-            className="cluster"
-            delay={i * 0.06}
-            y={20}
-          >
-            <div className="cluster-head">
-              <span
-                className="orbit-dot"
-                style={{
-                  background: cluster.color,
-                  boxShadow: `0 0 10px ${cluster.color}`,
-                }}
-              />
-              <h3>{cluster.title}</h3>
-            </div>
-            <ul className="skill-chip-list">
-              {cluster.items.map((item) => (
-                <SkillChip key={item.name} item={item} color={cluster.color} />
-              ))}
-            </ul>
-          </Reveal>
-        ))}
-      </div>
-    </section>
-  );
+  return <section id="skills"><Reveal className="eyebrow">02 / Capabilities</Reveal><div className="sec-head"><div><Reveal as="h2" className="sec-title">Data Science Toolkit</Reveal><Reveal as="p" className="section-subtitle">From raw data to production-ready intelligence.</Reveal></div><Reveal as="div" className="sec-count mono" delay={.1}>06 disciplines · one workflow</Reveal></div><div className="skill-clusters">{skillClusters.map((cluster, i) => <SkillCard key={cluster.title} cluster={cluster} index={i} />)}</div></section>;
 }

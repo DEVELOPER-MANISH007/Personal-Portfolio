@@ -1,0 +1,38 @@
+export const activationFunctions = {
+  sigmoid: {
+    label: "Sigmoid",
+    formula: "σ(x) = 1 / (1 + e⁻ˣ)",
+    range: "(0, 1)",
+    gradient: "Saturates at both extremes",
+    explanation: "Squashes values into a probability-shaped range; often used at a binary classification output.",
+    evaluate: (x) => 1 / (1 + Math.exp(-x)),
+    domain: [-0.08, 1.08],
+  },
+  tanh: {
+    label: "Tanh",
+    formula: "tanh(x) = (eˣ − e⁻ˣ) / (eˣ + e⁻ˣ)",
+    range: "(−1, 1)",
+    gradient: "Saturates at both extremes",
+    explanation: "A zero-centered squashing function; saturation can make gradients small for large inputs.",
+    evaluate: (x) => Math.tanh(x),
+    domain: [-1.12, 1.12],
+  },
+  relu: {
+    label: "ReLU",
+    formula: "ReLU(x) = max(0, x)",
+    range: "[0, ∞)",
+    gradient: "Zero for x < 0; one for x > 0",
+    explanation: "Keeps positive values and clips negative values; a common hidden-layer activation.",
+    evaluate: (x) => Math.max(0, x),
+    domain: [-0.4, 4.4],
+  },
+  leakyRelu: {
+    label: "Leaky ReLU",
+    formula: "LeakyReLU(x) = max(0.01x, x)",
+    range: "(−∞, ∞)",
+    gradient: "Small slope 0.01 for x < 0",
+    explanation: "Retains a small negative-side slope, which can reduce fully inactive ReLU units.",
+    evaluate: (x) => (x >= 0 ? x : 0.01 * x),
+    domain: [-0.46, 4.4],
+  },
+};

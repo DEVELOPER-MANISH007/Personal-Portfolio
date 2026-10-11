@@ -1,4 +1,4 @@
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useEffect, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -373,9 +373,18 @@ function CameraRig({ scrollRef, mouseRef }) {
    parent so the whole scene reacts to real page scroll + cursor.
 --------------------------------------------------------------- */
 export default function SceneBackground({ scrollRef, mouseRef }) {
+  const [reducedMotion, setReducedMotion] = useState(false);
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReducedMotion(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
   return (
     <div className="scene-canvas-wrap">
       <Canvas
+        frameloop={reducedMotion ? "demand" : "always"}
         camera={{ position: [0, 20, 460], fov: 62, near: 0.1, far: 6000 }}
         gl={{ antialias: true, powerPreference: "high-performance" }}
         dpr={[1, 2]}

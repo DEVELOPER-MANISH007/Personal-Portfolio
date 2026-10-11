@@ -137,7 +137,7 @@ export default function ProjectModal({ project, onClose }) {
                 rel="noreferrer"
                 className="btn btn-ghost"
               >
-                Live Demo ↗
+                {project.demoLabel || "View project page"} ↗
               </a>
             )}
           </div>

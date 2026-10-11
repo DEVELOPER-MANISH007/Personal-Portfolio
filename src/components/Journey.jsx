@@ -1,82 +1,102 @@
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { FaGraduationCap } from "react-icons/fa";
 import Reveal from "./Reveal";
-import { education, certifications } from "../data/content";
+import { certifications, education } from "../data/content";
 
-/**
- * JourneyCard — a bigger info card that tilts toward the cursor,
- * used for both the education entry and each certification.
- */
-function JourneyCard({ eyebrow, title, subtitle, color }) {
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-
-  const springX = useSpring(x, { stiffness: 200, damping: 20 });
-  const springY = useSpring(y, { stiffness: 200, damping: 20 });
-
-  const rotateX = useTransform(springY, [-60, 60], [6, -6]);
-  const rotateY = useTransform(springX, [-180, 180], [-6, 6]);
-
-  function handleMove(e) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    x.set(e.clientX - rect.left - rect.width / 2);
-    y.set(e.clientY - rect.top - rect.height / 2);
-  }
-  function handleLeave() {
-    x.set(0);
-    y.set(0);
-  }
-
+function CertificateGallery() {
   return (
-    <motion.div
-      className="journey-card"
-      onMouseMove={handleMove}
-      onMouseLeave={handleLeave}
-      style={{ rotateX, rotateY, "--accent": color }}
-      whileHover={{ scale: 1.02 }}
-    >
-      <span className="journey-card-glow" />
-      <span className="when mono">{eyebrow}</span>
-      <h4>{title}</h4>
-      <p>{subtitle}</p>
-    </motion.div>
+    <div className="education-certificates" aria-labelledby="certificates-title">
+      <div className="education-subhead">
+        <div>
+          <h3 id="certificates-title">Certificates</h3>
+          <p>Original credentials and course completions.</p>
+        </div>
+        <span className="mono">{String(certifications.length).padStart(2, "0")} FILES</span>
+      </div>
+
+      <div className="education-certificate-list">
+        {certifications.map((certificate, index) => (
+          <Reveal key={certificate.name} delay={index * 0.035} y={12}>
+            <article className="education-certificate-card">
+              <div className="education-certificate-preview">
+                <img
+                  src={certificate.preview}
+                  alt={`Original ${certificate.name} certificate from ${certificate.org}`}
+                  loading="lazy"
+                />
+              </div>
+              <div className="education-certificate-info">
+                <span className="education-certificate-issuer mono">{certificate.org}</span>
+                <h4>{certificate.name}</h4>
+                <p>{certificate.date}</p>
+                <div className="education-certificate-actions">
+                  <a href={certificate.file} target="_blank" rel="noreferrer">
+                    View Certificate <span aria-hidden="true">↗</span>
+                  </a>
+                  {certificate.verify && (
+                    <a href={certificate.verify} target="_blank" rel="noreferrer">
+                      Verify <span aria-hidden="true">↗</span>
+                    </a>
+                  )}
+                </div>
+              </div>
+            </article>
+          </Reveal>
+        ))}
+      </div>
+    </div>
   );
 }
 
 export default function Journey() {
   return (
-    <section id="journey">
-      <Reveal className="eyebrow">04 / Journey</Reveal>
+    <section id="education" aria-labelledby="education-title">
+      <Reveal className="eyebrow">04 / Education & Certifications</Reveal>
 
-      <div className="sec-head">
-        <Reveal as="h2" className="sec-title">
-          Education & certifications
-        </Reveal>
+      <div className="sec-head education-heading">
+        <div>
+          <Reveal as="h2" id="education-title" className="sec-title">
+            Education & Certifications
+          </Reveal>
+          <Reveal as="p" className="section-subtitle">
+            Academic foundation and documented learning milestones.
+          </Reveal>
+        </div>
       </div>
 
-      <div className="journey-grid">
-        <div>
+      <div className="education-layout">
+        <div className="education-primary">
           <Reveal>
-            <JourneyCard
-              eyebrow={education.years}
-              title={education.degree}
-              subtitle={`${education.school} · ${education.cgpa}`}
-              color="#7dd8ff"
-            />
+            <article className="education-degree-card">
+              <div className="education-card-topline">
+                <span className="education-icon" aria-hidden="true">
+                  <FaGraduationCap />
+                </span>
+                <span className="education-years mono">{education.years}</span>
+              </div>
+              <span className="education-kicker mono">BACHELOR OF TECHNOLOGY</span>
+              <h3>{education.degree}</h3>
+              <p className="education-school">{education.school}</p>
+              <div className="education-cgpa">
+                <span className="education-cgpa-value">7.5</span>
+                <span className="education-cgpa-label mono">CGPA</span>
+              </div>
+            </article>
+          </Reveal>
+
+          <Reveal delay={0.06}>
+            <aside className="education-focus-card">
+              <span className="education-focus-mark" aria-hidden="true">01</span>
+              <div>
+                <span className="education-kicker mono">FOUNDATION</span>
+                <p>Computer Science foundation with a focus on practical data science and machine learning.</p>
+              </div>
+            </aside>
           </Reveal>
         </div>
 
-        <div className="journey-cert-stack">
-          {certifications.map((c, i) => (
-            <Reveal key={c.name} delay={i * 0.08}>
-              <JourneyCard
-                eyebrow="Certification"
-                title={c.name}
-                subtitle={c.org}
-                color={["#a78bfa", "#ff8b6b", "#9be8c4"][i % 3]}
-              />
-            </Reveal>
-          ))}
-        </div>
+        <Reveal className="education-gallery-wrap" delay={0.04}>
+          <CertificateGallery />
+        </Reveal>
       </div>
     </section>
   );

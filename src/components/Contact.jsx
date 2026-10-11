@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { FaEnvelope, FaFilePdf, FaGithub, FaLinkedin } from "react-icons/fa";
 import Reveal from "./Reveal";
+import ContactOrb from "./ContactOrb";
 import { profile } from "../data/content";
+import { resumeUrl } from "../data/resume";
 
 /**
  * Contact — a real, production-ready "Say Hello" form.
@@ -56,10 +59,7 @@ export default function Contact() {
     e.preventDefault();
 
     // Honeypot: real users never fill this hidden field in.
-    if (form.company) {
-      setStatus("success");
-      return;
-    }
+    if (form.company) return;
 
     const nextErrors = validate(form);
     setErrors(nextErrors);
@@ -95,7 +95,7 @@ export default function Contact() {
       );
       setStatus("success");
       setForm(initialForm);
-    } catch (err) {
+    } catch {
       setStatus("error");
       setErrorMessage(
         "Something went wrong sending that — please try the email link below."
@@ -104,140 +104,103 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact">
-      <Reveal className="eyebrow">06 / Contact</Reveal>
-
-      <Reveal as="h2" className="contact-title" delay={0.05}>
-        Let's turn your data
-        <br />
-        into something useful.
-      </Reveal>
-
-      <Reveal as="p" className="sub" delay={0.1}>
-        Open to data science & ML engineering roles. I reply fast — drop a
-        line below or reach out directly.
-      </Reveal>
-
-      <Reveal delay={0.12} y={20}>
-        <form className="contact-form" onSubmit={handleSubmit} noValidate>
-          {/* Honeypot — hidden from real users, invisible to screen
-              readers, but bots that auto-fill every field trip it. */}
-          <div className="hp-field" aria-hidden="true">
-            <label htmlFor="company">Company</label>
-            <input
-              id="company"
-              name="company"
-              type="text"
-              tabIndex={-1}
-              autoComplete="off"
-              value={form.company}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="form-row">
-            <div className="form-field">
-              <label htmlFor="name">Name</label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                autoComplete="name"
-                value={form.name}
-                onChange={handleChange}
-                aria-invalid={!!errors.name}
-                aria-describedby={errors.name ? "name-error" : undefined}
-              />
-              {errors.name && (
-                <span className="field-error" id="name-error" role="alert">
-                  {errors.name}
-                </span>
-              )}
+    <section id="contact" aria-labelledby="contact-title">
+      <div className="contact-shell">
+        <Reveal className="eyebrow">06 / Contact</Reveal>
+        <div className="contact-layout">
+          <div className="contact-left-column">
+            <div className="contact-intro">
+              <Reveal as="h2" id="contact-title" className="contact-title" delay={0.05}>
+                Have an idea?<br />Let&apos;s connect.
+              </Reveal>
+              <Reveal as="p" className="sub" delay={0.1}>
+                Have a Data Science, Machine Learning, or AI project in mind? Let&apos;s exchange ideas and build something useful.
+              </Reveal>
             </div>
 
-            <div className="form-field">
-              <label htmlFor="email">Email</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                value={form.email}
-                onChange={handleChange}
-                aria-invalid={!!errors.email}
-                aria-describedby={errors.email ? "email-error" : undefined}
-              />
-              {errors.email && (
-                <span className="field-error" id="email-error" role="alert">
-                  {errors.email}
-                </span>
-              )}
+            <Reveal className="contact-visual-block" delay={0.12}>
+              <ContactOrb />
+              <div className="contact-orb-caption">
+                <span className="contact-opportunity"><i aria-hidden="true" />OPEN TO OPPORTUNITIES</span>
+                <p>Every great solution starts with a connection.</p>
+              </div>
+            </Reveal>
+
+            <Reveal className="contact-links" delay={0.16}>
+              <a className="contact-link" href={`mailto:${profile.email}`}>
+                <FaEnvelope className="contact-link-icon" aria-hidden="true" />
+                <span className="contact-link-copy"><span className="contact-link-label mono">EMAIL</span><span>{profile.email}</span></span>
+                <span className="contact-link-arrow" aria-hidden="true">↗</span>
+              </a>
+              <a className="contact-link" href={profile.github} target="_blank" rel="noreferrer" aria-label="GitHub profile (opens in a new tab)">
+                <FaGithub className="contact-link-icon" aria-hidden="true" />
+                <span className="contact-link-copy"><span className="contact-link-label mono">GITHUB</span><span>DEVELOPER-MANISH007</span></span>
+                <span className="contact-link-arrow" aria-hidden="true">↗</span>
+              </a>
+              <a className="contact-link" href={profile.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn profile (opens in a new tab)">
+                <FaLinkedin className="contact-link-icon" aria-hidden="true" />
+                <span className="contact-link-copy"><span className="contact-link-label mono">LINKEDIN</span><span>Mitansh Kumar</span></span>
+                <span className="contact-link-arrow" aria-hidden="true">↗</span>
+              </a>
+            </Reveal>
+            <Reveal className="contact-resume-action" delay={0.18}>
+              <a href={resumeUrl} target="_blank" rel="noreferrer" aria-label="View Manish Kumar resume PDF in a new tab">
+                <FaFilePdf aria-hidden="true" />
+                <span>View Resume <small>PDF · Opens in a new tab</small></span>
+                <span className="contact-resume-arrow" aria-hidden="true">↗</span>
+              </a>
+            </Reveal>
+          </div>
+
+          <Reveal className="contact-form-wrap" delay={0.12} y={20}>
+            <div className="contact-panel-header">
+              <div>
+                <span className="contact-panel-kicker mono">INITIATE CONNECTION</span>
+                <p>Send a message</p>
+              </div>
+              <span className={`contact-panel-state mono${status === "sending" ? " is-sending" : ""}`}><i aria-hidden="true" />{status === "sending" ? "SENDING" : "READY"}</span>
             </div>
-          </div>
+            <form className="contact-form" onSubmit={handleSubmit} noValidate aria-busy={status === "sending"}>
+              <div className="hp-field" aria-hidden="true">
+                <label htmlFor="company">Company</label>
+                <input id="company" name="company" type="text" tabIndex={-1} autoComplete="off" value={form.company} onChange={handleChange} />
+              </div>
 
-          <div className="form-field">
-            <label htmlFor="message">Message</label>
-            <textarea
-              id="message"
-              name="message"
-              rows={5}
-              value={form.message}
-              onChange={handleChange}
-              aria-invalid={!!errors.message}
-              aria-describedby={errors.message ? "message-error" : undefined}
-            />
-            {errors.message && (
-              <span className="field-error" id="message-error" role="alert">
-                {errors.message}
-              </span>
-            )}
-          </div>
+              <div className="form-row">
+                <div className="form-field">
+                  <label htmlFor="name">Name</label>
+                  <input id="name" name="name" type="text" autoComplete="name" value={form.name} placeholder="Your name" onChange={handleChange} aria-invalid={!!errors.name} aria-describedby={errors.name ? "name-error" : undefined} />
+                  {errors.name && <span className="field-error" id="name-error" role="alert">{errors.name}</span>}
+                </div>
 
-          <div className="form-footer">
-            <motion.button
-              type="submit"
-              className="btn btn-solid"
-              disabled={status === "sending"}
-              whileTap={{ scale: 0.97 }}
-            >
-              {status === "sending" ? "Sending…" : "Send Message"}
-            </motion.button>
+                <div className="form-field">
+                  <label htmlFor="email">Email</label>
+                  <input id="email" name="email" type="email" autoComplete="email" value={form.email} placeholder="you@example.com" onChange={handleChange} aria-invalid={!!errors.email} aria-describedby={errors.email ? "email-error" : undefined} />
+                  {errors.email && <span className="field-error" id="email-error" role="alert">{errors.email}</span>}
+                </div>
+              </div>
 
-            <div className="form-status" role="status" aria-live="polite">
-              {status === "success" && (
-                <span className="status-ok">
-                  ✓ Sent — I'll get back to you soon.
-                </span>
-              )}
-              {status === "error" && (
-                <span className="status-err">{errorMessage}</span>
-              )}
-            </div>
-          </div>
-        </form>
-      </Reveal>
+              <div className="form-field">
+                <label htmlFor="message">Message</label>
+                <textarea id="message" name="message" rows={6} value={form.message} placeholder="Tell me a little about what you have in mind…" onChange={handleChange} aria-invalid={!!errors.message} aria-describedby={errors.message ? "message-error" : undefined} />
+                {errors.message && <span className="field-error" id="message-error" role="alert">{errors.message}</span>}
+              </div>
 
-      <Reveal className="contact-links" delay={0.15}>
-        <a className="contact-link" href={`mailto:${profile.email}`}>
-          <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-            <rect x="2" y="4" width="20" height="16" rx="2" />
-            <path d="m22 6-10 7L2 6" />
-          </svg>
-          {profile.email}
-        </a>
-        <a className="contact-link" href={profile.github} target="_blank" rel="noreferrer">
-          <svg className="ic" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 0a12 12 0 0 0-3.79 23.4c.6.11.82-.26.82-.58v-2.17c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.3 3.5.99.1-.78.42-1.3.76-1.6-2.66-.3-5.46-1.33-5.46-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.25 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.62-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.83.58A12 12 0 0 0 12 0z" />
-          </svg>
-          GitHub
-        </a>
-        <a className="contact-link" href={profile.linkedin} target="_blank" rel="noreferrer">
-          <svg className="ic" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.38-1.85 3.61 0 4.28 2.38 4.28 5.47v6.27zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.12 20.45H3.56V9h3.56v11.45z" />
-          </svg>
-          LinkedIn
-        </a>
-      </Reveal>
+              <div className="form-footer">
+                <motion.button type="submit" className="btn btn-solid" disabled={status === "sending"} whileTap={{ scale: 0.97 }}>
+                  {status === "sending" ? "Sending…" : "Send Message"}
+                  {status === "sending" && <span className="contact-submit-indicator" aria-hidden="true" />}
+                </motion.button>
+                <div className="form-status" role="status" aria-live="polite">
+                  {status === "success" && <span className="status-ok">✓ Message sent — I’ll get back to you soon.</span>}
+                  {status === "error" && <span className="status-err">{errorMessage}</span>}
+                </div>
+              </div>
+            </form>
+            <div className="contact-panel-foot mono"><span>DATA SCIENCE</span><span>·</span><span>MACHINE LEARNING</span><span>·</span><span>AI</span></div>
+          </Reveal>
+        </div>
+      </div>
     </section>
   );
 }

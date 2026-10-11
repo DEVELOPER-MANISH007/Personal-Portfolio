@@ -1,5 +1,6 @@
-import { useEffect, useRef } from "react";
-import SceneBackground from "./components/SceneBackground";
+import { Suspense, lazy, useEffect, useRef } from "react";
+import { MotionConfig } from "framer-motion";
+const SceneBackground = lazy(() => import("./components/SceneBackground"));
 import CustomCursor from "./components/CustomCursor";
 import MouseGlow from "./components/MouseGlow";
 import ScrollProgress from "./components/ScrollProgress";
@@ -43,14 +44,16 @@ export default function App() {
   }, []);
 
   return (
-    <>
+    <MotionConfig reducedMotion="user">
       <a href="#main-content" className="skip-link">
         Skip to content
       </a>
 
       <Loader />
       <ScrollProgress />
-      <SceneBackground scrollRef={scrollRef} mouseRef={mouseRef} />
+      <Suspense fallback={null}>
+        <SceneBackground scrollRef={scrollRef} mouseRef={mouseRef} />
+      </Suspense>
       <div className="grain" />
       <MouseGlow />
       <CustomCursor />
@@ -68,6 +71,6 @@ export default function App() {
       </main>
 
       <footer>built with react, three.js & coffee — © 2026 manish kumar</footer>
-    </>
+    </MotionConfig>
   );
 }
